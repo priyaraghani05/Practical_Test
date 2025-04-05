@@ -12,18 +12,4 @@ export const COMMON_STYLE = StyleSheet.create({
             fontFamily: 'TenorSans-Regular'
         }
     },
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    rowContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    rowView: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    }
 })

@@ -1,61 +1,111 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   FlatList,
-  TouchableOpacity,
   View,
   Text,
   StyleSheet
 } from 'react-native';
 
-import { useDispatch, useSelector } from 'react-redux';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { COLORS, COMMON_STYLE } from '../../constant';
 import { ResponsiveHeight, ResponsiveWidth } from '../../helper';
-import { deleteEvent } from '../../action';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import DropDownPicker from 'react-native-dropdown-picker';
 import moment from 'moment';
 
 
 
 export function EventDetails({ route,navigation }) {
-  const dispatch = useDispatch();
-  const eventDetails = useSelector(state => state.eventDetails);
+
+  const [reccuranceData,setReccuranceData] = useState([])
+
+
+useEffect(() => {
+  if (route.params.event_type !== "Single") {
+    generateRecurrenceDates()
+  }
+
+},[])
+
+
+
+const generateRecurrenceDates = () => {
+  let current = moment(route.params.start_date, 'YYYY-MM-DD');
+  const end = moment(route.params.end_date, 'YYYY-MM-DD');
+  const start = moment(route.params.start_date, 'YYYY-MM-DD');
+  const result = [];
+    
+  while (current.isSameOrBefore(end)) {
+    switch (route.params.event_type) {
+      case 'daily':
+         current.add(1, 'days'); 
+        break;
   
+      case 'weekly':
+          current.add(1, 'weeks'); 
+        break;
+  
+      case 'monthly':
+          current.add(1, 'months'); 
+        break;
+  
+      case 'yearly':
+          current.add(1, 'years'); 
+        break;
+  
+      default:
+        console.warn("Unknown recurrence type");
+        break;
+    }
 
+    if (current.isSameOrBefore(end) && !current.isSame(start, 'day')) {      
+      result.push(current.format('YYYY-MM-DD'));
+    }
+   
+  }
+  const firstFiveDates = result.slice(0, 5);
+  setReccuranceData(firstFiveDates)
+};
 
+const _renderItems = ({item,index}) =>(
+  <>
+  <View style={styles.dateItemContainer}>
+  <Icon name={'date-range'} size={ResponsiveWidth(6)} color={COLORS['blue']} />
+  <Text style={[COMMON_STYLE.textStyle(14, 'black'),{flex:1,marginHorizontal:ResponsiveWidth(2)}]}>{item}</Text> 
+  </View>
+  <View style={{borderBottomWidth:0.3,borderBottomColor:'grey'}} />
+  </>
+)
 
-
-
+const _renderTextView = (title,item) => (
+        <View style={styles.textContainer}>
+          <Text style={styles.titleStyle}>{`${title} :  `}</Text>
+          <Text style={item.itemStyle}>{item}</Text>
+        </View>
+)
 
   return (
     <View style={{ flex: 1 }}>
      
    
      <View style={styles.cardView}>
-        <View style={{ flexDirection: 'row', flex: 1 }}>
-          <Text style={COMMON_STYLE.textStyle(14, 'black', 'bold')}>{"Task Name: "}</Text>
-          <Text style={COMMON_STYLE.textStyle(14, 'black')}>{route?.params.task_name}</Text>
-        </View>
-        <View style={{ flexDirection: 'row', flex: 1 }}>
-          <Text style={COMMON_STYLE.textStyle(14, 'black', 'bold')}>{"Description: "}</Text>
-          <Text style={COMMON_STYLE.textStyle(14, 'black')}>{route?.params.description}</Text>
-        </View>
-        <View style={{ flexDirection: 'row', flex: 1 }}>
-          <Text style={COMMON_STYLE.textStyle(14, 'black', 'bold')}>{"Start date: "}</Text>
-          <Text style={COMMON_STYLE.textStyle(14, 'black')}>{route?.params.startdate}</Text>
-        </View>
-        <View style={{ flexDirection: 'row', flex: 1 }}>
-          <Text style={COMMON_STYLE.textStyle(14, 'black', 'bold')}>{"End date: "}</Text>
-          <Text style={COMMON_STYLE.textStyle(14, 'black')}>{route?.params.enddate}</Text>
-        </View>
-        <View style={{ flexDirection: 'row', flex: 1 }}>
-          <Text style={COMMON_STYLE.textStyle(14, 'black', 'bold')}>{"Reccurance Type: "}</Text>
-          <Text style={COMMON_STYLE.textStyle(14, 'black')}>{route?.params.event_type}</Text>
-        </View>
+      {_renderTextView("Task Name",route?.params.task_name)}
+      {_renderTextView("Description",route?.params.description)}
+      {_renderTextView("Start date",moment(route?.params.start_date).format('YYYY-MM-DD'))}
+      {_renderTextView("End date",moment(route?.params.end_date).format('YYYY-MM-DD'))}
+      {_renderTextView("Reccurance",route?.params.event_type)}
       </View>
+
+      {reccuranceData.length > 0 && (
+        <View style ={styles.cardView}>
+          <Text style={[COMMON_STYLE.textStyle(22, 'black', 'bold'),{marginVertical:ResponsiveHeight(2)}]}>{"Reccurance Data :"}</Text>
+          <FlatList 
+          data={reccuranceData}
+          renderItem={_renderItems}
+          />
+          </View>
+      )}
+
+
     </View>
   );
 }
@@ -78,16 +128,23 @@ const styles = StyleSheet.create({
     paddingVertical: ResponsiveHeight(1.5),
     paddingHorizontal: ResponsiveWidth(4),
   },
-  floatBtnStyle: {
-    width: ResponsiveWidth(12),
-    height: ResponsiveWidth(12),
-    right: ResponsiveWidth(3),
-    backgroundColor: COLORS['blue'],
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: ResponsiveWidth(12),
-    bottom: ResponsiveHeight(1.5),
-    position: 'absolute',
+  textContainer:{
+    flexDirection: 'row',
+    paddingVertical:ResponsiveHeight(0.5)
   },
+  titleStyle:{
+   ... COMMON_STYLE.textStyle(14, 'black', 'bold')
+  },
+  itemStyle:{
+  ...COMMON_STYLE.textStyle(14, 'black'),
+  paddingHorizontal:ResponsiveWidth(2)
+},
+dateItemContainer:{
+  flexDirection:'row',
+  justifyContent:'space-between',
+  alignItems:'center',
+  marginVertical:ResponsiveHeight(1)
+}
+
 });
 

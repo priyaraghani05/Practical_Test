@@ -11,11 +11,15 @@ export const StackNavigation = () =>{
 
     return (
         <NavigationContainer  >
-        <Stack.Navigator initialRouteName={loginDetails.data.IsLogin === 'true' ? "Events" : "Signup" }>
+        <Stack.Navigator initialRouteName={loginDetails.data.IsLogin === 'true' ? "Signup" : "Signup" } screenOptions={{headerTitleAlign: 'center'}} >
         <Stack.Screen name="Signup" component={screens.Signup} />
         <Stack.Screen name="Events" component={screens.Events} />
-        <Stack.Screen name="CreateEvent" component={screens.CreateEvent} />
-        <Stack.Screen name="EventDetails" component={screens.EventDetails} />
+        <Stack.Screen name="Create Event" component={screens.CreateEvent}
+         options={({ route }) => ({
+            title: route.params?.isEdit  ? 'Edit Event' : 'Create Event'
+          })}
+         />
+        <Stack.Screen name="Event Details" component={screens.EventDetails} />
         </Stack.Navigator>
         </NavigationContainer>
     )

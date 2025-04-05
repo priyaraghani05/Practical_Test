@@ -39,85 +39,59 @@ export function Events({ navigation }) {
   ];
 
   useEffect(() => {
-    setEventData(eventDetails?.data || []);
+    setEventData(eventDetails?.data || []);    
   }, [eventDetails]);
 
   useEffect(() => {
     updateFilteredEvents(selectedFilter);
-  }, [selectedFilter, eventData]); // Re-run when `eventData` updates
+  }, [selectedFilter, eventData]); 
 
-  const updateFilteredEvents = (filter) => {
-
-
-    
-    const today = moment();
-    const startOfWeek = today.startOf("week");
-    const endOfWeek = today.endOf("week");
-    const startOfMonth = today.startOf("month");
-    const endOfMonth = today.endOf("month");
-    const startOfYear = today.startOf("year");
-    const endOfYear = today.endOf("year");
-    console.log("filter >>>>> ",filter);
-
-
-    let result = [];
-    switch (filter) {
-      case "today":
-        result = filterEvents(today.startOf("day"), today.endOf("day"));
-        break;
-      case "week":
-        result = filterEvents(startOfWeek, endOfWeek);
-        break;
-      case "month":
-        result = filterEvents(startOfMonth, endOfMonth);
-        break;
-      case "year":
-        result = filterEvents(startOfYear, endOfYear);
-        break;
-    }
-    setFilteredEvents(result);
-  };
-
-  const filterEvents = (startRange, endRange) => {
-    return eventData?.filter((event) => {
-      console.log("event >>>> ",event);
-      
-      const eventStart = moment(event.start_date, "YYYY-MM-DD", true);
-      const eventEnd = moment(event.end_date, "YYYY-MM-DD", true);
-      if (!eventStart.isValid() || !eventEnd.isValid()) {
-        console.warn("Invalid date format:", event.start_date, event.end_date);
-        return false;
-      }
-
-      console.log("eventStart) >>>> ",event.start_date,event.end_date ,endRange, startRange,( eventStart.isValid() &&
-      eventEnd.isValid() &&
-      eventStart.isBetween(startRange, endRange, null, "[]")&&
-      eventEnd.isBetween(startRange, endRange, null, "[]")));
-      
+  const updateFilteredEvents = (filterType) => {    
+    const today = moment().format('YYYY-MM-DD');
+    const startOfWeek = moment().startOf('week');
+    const endOfWeek = moment().endOf('week');
+    const startOfMonth = moment().startOf('month');
+    const endOfMonth = moment().endOf('month');
+    const startOfYear = moment().startOf('year');
+    const endOfYear = moment().endOf('year');
   
-      // Check if event overlaps with the given range
-      return (
-        eventStart.isValid() &&
-      eventEnd.isValid() &&
-      eventStart.isBetween(startRange, endRange, null, "[]")&&
-      eventEnd.isBetween(startRange, endRange, null, "[]")
-      );
+    const filterData = eventData.filter(task => {
+      const startDate = moment(task.start_date);
+      const endDate = moment(task.end_date);
+  
+      switch (filterType) {
+        case 'today':
+          return today >= startDate.format('YYYY-MM-DD') && today <= endDate.format('YYYY-MM-DD');
+        case 'week':
+          return startDate.isBefore(endOfWeek) && endDate.isAfter(startOfWeek);
+        case 'month':
+          return startDate.isBefore(endOfMonth) && endDate.isAfter(startOfMonth);
+        case 'year':
+          return startDate.isBefore(endOfYear) && endDate.isAfter(startOfYear);
+        default:
+          return false;
+      }
     });
+
+    setFilteredEvents(filterData)    
   };
 
-  const renderRightActions = (id) => (
+
+
+  const renderRightActions = (item) => (
     <View style={{ flexDirection: 'row' }}>
-      <TouchableOpacity onPress={() => deleteEventItem(id)} style={styles.deleteContainer}>
+      <TouchableOpacity onPress={() => deleteEventItem(item.id)} style={styles.deleteContainer}>
         <Icon name={'delete'} size={ResponsiveWidth(6)} color={COLORS['dark_red']} />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => onClickItem(item)} style={styles.editContainer}>
-                <Icon name={'edit'} size={ResponsiveWidth(6)} color={COLORS['black']} />
-            </TouchableOpacity>
+          <Icon name={'edit'} size={ResponsiveWidth(6)} color={COLORS['black']} />
+      </TouchableOpacity>
     </View>
   );
 
   function onClickItem(item) {
-    navigation.navigate("CreateEvent",{...item,isEdit:true})
+    navigation.navigate("Create Event",{...item,isEdit:true});
+    swipeableRefs.current[item.id]?.close();
 
     }
 
@@ -138,26 +112,34 @@ export function Events({ navigation }) {
     ]);
   };
 
+
+  const _renderTextView = (title,item) => (
+          <View style={styles.textContainer}>
+            <Text style={styles.titleStyle}>{`${title} :  `}</Text>
+            <Text style={item.itemStyle}>{item}</Text>
+          </View>
+  )
+  
   const _renderItems = ({ item }) => (
     <Swipeable
       ref={(ref) => (swipeableRefs.current[item.id] = ref)}
-      renderRightActions={() => renderRightActions(item.id)}
-    >
-      <TouchableOpacity style={styles.cardView}  onPress={() => navigation.navigate("EventDetails",item)} >
-        <View style={{ flexDirection: 'row', flex: 1 }}>
-          <Text style={COMMON_STYLE.textStyle(14, 'black', 'bold')}>{"Task Name: "}</Text>
-          <Text style={COMMON_STYLE.textStyle(14, 'black')}>{item?.task_name}</Text>
-        </View>
-        <View style={{ flexDirection: 'row', flex: 1 }}>
-          <Text style={COMMON_STYLE.textStyle(14, 'black', 'bold')}>{"Description: "}</Text>
-          <Text style={COMMON_STYLE.textStyle(14, 'black')}>{item?.description}</Text>
-        </View>
+      renderRightActions={() => renderRightActions(item)}>
+      <TouchableOpacity style={styles.cardView}  onPress={() => navigation.navigate("Event Details",item)} >
+          {_renderTextView("Task Name",item.task_name)}
+          {_renderTextView("Description",item.description)}
+          {_renderTextView("Start date",moment(item.start_date).format('YYYY-MM-DD'))}
+          {_renderTextView("End date",moment(item.end_date).format('YYYY-MM-DD'))}
+          {_renderTextView("Reccurance",item.event_type)}
       </TouchableOpacity>
     </Swipeable>
   );
 
+
+
   return (
     <View style={{ flex: 1 }}>
+      <View style ={{marginHorizontal:ResponsiveWidth(4),marginVertical:ResponsiveHeight(2)}}>
+
       <DropDownPicker
         open={open}
         value={selectedFilter}
@@ -165,17 +147,22 @@ export function Events({ navigation }) {
         setOpen={setOpen}
         setValue={setSelectedFilter}
         placeholder="Select Filter"
-      />
+        />
+        </View>
       <FlatList
         data={filteredEvents}
         renderItem={_renderItems}
         keyExtractor={(item) => `task_${item.id}`}
-        style={{ marginBottom: ResponsiveHeight(8) }}
-      />
+        style={{ marginBottom: ResponsiveHeight(8),paddingBottom:ResponsiveHeight(6) }}
+        showsVerticalScrollIndicator={false}
+        />
       <TouchableOpacity 
-        onPress={() => navigation.navigate('CreateEvent')}
+        onPress={() => {
+          navigation.navigate('Create Event')
+          
+        }}
         style={styles.floatBtnStyle}
-      >
+        >
         <Text style={{ color: 'white', fontSize: 16 }}>Add</Text>
       </TouchableOpacity>
     </View>
@@ -211,5 +198,28 @@ const styles = StyleSheet.create({
     bottom: ResponsiveHeight(1.5),
     position: 'absolute',
   },
+  editContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: ResponsiveWidth(1),
+    marginRight: ResponsiveWidth(2),
+},
+deleteContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: ResponsiveWidth(3),
+    marginRight: ResponsiveWidth(1),
+},
+textContainer:{
+  flexDirection: 'row',
+  paddingVertical:ResponsiveHeight(0.5)
+},
+titleStyle:{
+  ... COMMON_STYLE.textStyle(14, 'black', 'bold')
+ },
+ itemStyle:{
+ ...COMMON_STYLE.textStyle(14, 'black'),
+ paddingHorizontal:ResponsiveWidth(2)
+},
 });
 

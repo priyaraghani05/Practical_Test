@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext } from 'react';
 import { COMMON_STYLE } from '../constant';
-import { ActionSheetIOS, ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { ResponsiveHeight, ResponsiveWidth } from '../helper';
 
 
@@ -26,8 +26,6 @@ const styles = StyleSheet.create({
     btnStyle: {
         marginHorizontal: ResponsiveWidth(6),
         paddingVertical: ResponsiveHeight(1.5),
-        // height: ResponsiveHeight(7.5),
-        // backgroundColor: '#314FA4',
         borderRadius: ResponsiveWidth(4),
         alignItems: 'center',
         justifyContent: 'center',

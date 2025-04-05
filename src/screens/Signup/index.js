@@ -13,10 +13,9 @@ import { ResponsiveHeight, ResponsiveWidth } from '../../helper';
 import { COMMON_STYLE } from '../../constant/commonStyle';
 import { ButtonView } from '../../components';
 import { LABLE } from '../../constant';
-import { getLoginDetails } from '../../reducer/getLoginDetails';
 import { saveLoginDetails } from '../../action';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 
 
@@ -46,6 +45,7 @@ const _renderInputView = (key) => {
               style={styles.inputView}
               placeholderTextColor="#ADA4A5"
               secureTextEntry={input[key].placeholder == 'Password'}
+              keyboardType={key === 'phone' ? 'number-pad':'default'}
 
           />
           {(input[key]?.errorText?.length > 0 && input[key]?.isError) && <Text style={[COMMON_STYLE.textStyle(12, 'red')]}>{`${input[key]?.errorText}`}</Text>}
@@ -73,8 +73,14 @@ function checkValidation() {
           validate: (value) => value.trim().length > 0,
       },
       phone: {
-          message: "Phone np should not be empty",
-          validate: (value) => value.trim().length > 0,
+        message: (value) => {
+            const trimmed = value.trim();
+            if (trimmed.length === 0) return "Phone number should not be empty";
+            if (!/^\d+$/.test(trimmed)) return "Phone number must contain digits only";
+            if (trimmed.length !== 10) return "Phone number must be exactly 10 digits";
+            return "";
+          },
+          validate: (value) => /^\d{10}$/.test(value.trim()),
       },
       email: {
           message: (value) => {
@@ -89,8 +95,19 @@ function checkValidation() {
       },
 
       password: {
-          message: "Password should not be empty",
-          validate: (value) => value.trim().length > 0,
+        message: (value) => {
+          const trimmed = value.trim();
+          if (trimmed.length === 0) return "Password should not be empty";
+    
+          const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,16}$/;
+    
+          if (!strongPasswordRegex.test(trimmed)) {
+            return "Password must be 8-16 characters long, include upper & lower case letters, a digit, and a special character";
+          }
+          return "";
+        },
+        validate: (value) =>
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,16}$/.test(value.trim()),
       },
 
 
@@ -156,11 +173,10 @@ function callSignUpApi() {
       {_renderInputView("password")}
 
       <ButtonView
-                    text={LABLE['sign_up']}
-                    onClick={() => callSignUpApi()}
-                    isLoaded={isLoaded}
-
-                />
+         text={LABLE['sign_up']}
+         onClick={() => callSignUpApi()}
+         isLoaded={isLoaded}
+      />
 
     </View>
   );
@@ -175,29 +191,6 @@ const styles = StyleSheet.create({
         height: ResponsiveHeight(6),
         ...COMMON_STYLE.textStyle(14, 'black')
     },
-    headerText: {
-        ...COMMON_STYLE.textStyle(24, 'black', 'bold'),
-        marginHorizontal: ResponsiveWidth(6),
-        marginVertical: ResponsiveHeight(2)
-    },
-    btnView: {
-        marginHorizontal: ResponsiveWidth(6),
-        height: ResponsiveHeight(7.5),
-        backgroundColor: '#314FA4',
-        borderRadius: ResponsiveWidth(6),
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginVertical: ResponsiveHeight(1.5)
-    },
-    imgContainer: {
-        borderColor: 'black',
-        width: ResponsiveWidth(4),
-        height: ResponsiveWidth(4),
-        borderWidth: 1,
-        marginTop: ResponsiveHeight(0.8),
-        alignItems: 'center',
-        justifyContent: 'center'
-    }
 })
 
 

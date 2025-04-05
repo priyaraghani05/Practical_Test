@@ -1,7 +1,8 @@
+import { actionType } from "../constant";
 
 export const getLoginDetails = (state = { data: {} }, action) => {
     switch (action.type) {
-        case 'LOGINDETAILS':
+        case  actionType.LOGINDETAILS:
             return {
                 ...state,
                 data: {...state.data, ...action.data},
