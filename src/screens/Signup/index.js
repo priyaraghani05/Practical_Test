@@ -1,12 +1,10 @@
 
 import React, { useState } from 'react';
 import {
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
-  useColorScheme,
+  SafeAreaView,
   View,
 } from 'react-native';
 import { ResponsiveHeight, ResponsiveWidth } from '../../helper';
@@ -14,6 +12,9 @@ import { COMMON_STYLE } from '../../constant/commonStyle';
 import { ButtonView } from '../../components';
 import { LABLE } from '../../constant';
 import { saveLoginDetails } from '../../action';
+
+import { CommonActions } from '@react-navigation/native';
+
 
 import { useDispatch } from 'react-redux';
 
@@ -151,7 +152,14 @@ function callSignUpApi() {
           }
           setLoaded(false)
           dispatch(saveLoginDetails(userData))   
-          navigation.navigate("Events")       
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 1,
+              routes: [
+                { name: 'Events' },
+              ],
+            })
+          );
          
       }
 
@@ -166,7 +174,7 @@ function callSignUpApi() {
 
 
   return (
-    <View>
+    <SafeAreaView>
       {_renderInputView("fName")}
       {_renderInputView("phone")}
       {_renderInputView("email")}
@@ -178,7 +186,7 @@ function callSignUpApi() {
          isLoaded={isLoaded}
       />
 
-    </View>
+    </SafeAreaView>
   );
 }
 

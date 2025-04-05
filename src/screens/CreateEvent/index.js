@@ -8,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  SafeAreaView
 } from 'react-native';
 
 import { useDispatch } from 'react-redux';
@@ -37,15 +38,15 @@ export function CreateEvent({route,navigation}) {
  const [open, setOpen] = useState(false);
  const [value, setValue] = useState(null);
  const [items, setItems] = useState([
-   {label: 'Single', value: 'Single'},
-   {label: 'Daily', value: 'Daily'},
+   {label: 'single', value: 'single'},
+   {label: 'daily', value: 'daily'},
    {label: 'weekly', value: 'weekly'},
    {label: 'monthly', value: 'monthly'},
    {label: 'yearly', value: 'yearly'},
  ]);
  const [dateData, setDateData] = useState({
-  startdate: { value: new Date(), open: false, placeholder: "Start Date", errorText: "", isError: false },
-  enddate: { value: new Date(), open: false, placeholder: "End Date", errorText: "", isError: false },
+  startdate: { value: null, open: false, placeholder: "Start Date", errorText: "", isError: false },
+  enddate: { value: null, open: false, placeholder: "End Date", errorText: "", isError: false },
 });
 
 
@@ -54,13 +55,13 @@ if (route.params && route.params.isEdit) {
   
   _onChangeText(route.params.task_name,"task_name");
   _onChangeText(route.params.description,"description");
-  setEditData(route.params.start_date,"start_date");
-  setEditData(route.params.end_date,"end_date");
+  setEditData(route.params.start_date,"startdate");
+  setEditData(route.params.end_date,"enddate");
   setValue(route.params.event_type)
 }
 },[route.params])
 
-function setEditData(date,key){
+function setEditData(date,key){  
   setDateData((prev) => ({
     ...prev,
     [key]: { ...prev[key], value: date, open: false, isError: false, errorText: "" },
@@ -152,8 +153,8 @@ const handleCreateEvent = () => {
     const eventData = {
       task_name: input.task_name.value,
       description: input.description.value,
-      start_date: moment(dateData.startdate.value).format('YYYY-MM-DD'),
-      end_date: moment(dateData.enddate.value).format('YYYY-MM-DD'),
+      start_date:dateData.startdate.value,
+      end_date: dateData.enddate.value,
       event_type: value,
       id:  route.params && route.params?.isEdit ? route.params.id :  Date.now().toString(),
     }    
@@ -195,7 +196,7 @@ const _renderDateInput = (key) => {
       {dateData[key].value && <Text style={{ color: "#4F4F4F" }}>{dateData[key].placeholder}</Text>}
 
       <View style={styles.dateContainer(dateData[key].isError)}>
-        <Text style={[COMMON_STYLE.textStyle(14, 'black'),{flex:1}]} >{dateData[key].value ? dateData[key].value.toDateString() : dateData[key].placeholder}</Text>
+        <Text style={[COMMON_STYLE.textStyle(14, 'black'),{flex:1}]} >{dateData[key].value ? moment(dateData[key].value).format("YYYY-MM-DD") : dateData[key].placeholder}</Text>
         <TouchableOpacity onPress={() => setDateData((prev) => ({ ...prev, [key]: { ...prev[key], open: true } }))}>
           <Icon name={'date-range'} size={ResponsiveWidth(6)} color={COLORS['blue']} />
         </TouchableOpacity>
@@ -228,7 +229,7 @@ const _renderDateInput = (key) => {
 
 
   return (
-    <View style = {{flex:1,backgroundColor:'whote'}} >
+    <SafeAreaView style = {{flex:1,backgroundColor:'whote'}} >
 
       {_renderInputView("task_name")}
       {_renderInputView("description")}
@@ -251,7 +252,7 @@ const _renderDateInput = (key) => {
           onClick={() => handleCreateEvent()}
           isLoaded={isLoaded}
        />
-    </View>
+    </SafeAreaView>
   );
 }
 

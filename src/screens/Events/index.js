@@ -5,7 +5,8 @@ import {
   TouchableOpacity,
   View,
   Text,
-  StyleSheet
+  StyleSheet,
+  SafeAreaView
 } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,6 +18,7 @@ import { deleteEvent } from '../../action';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DropDownPicker from 'react-native-dropdown-picker';
 import moment from 'moment';
+import { endAsyncEvent } from 'react-native/Libraries/Performance/Systrace';
 
 
 
@@ -124,7 +126,11 @@ export function Events({ navigation }) {
     <Swipeable
       ref={(ref) => (swipeableRefs.current[item.id] = ref)}
       renderRightActions={() => renderRightActions(item)}>
-      <TouchableOpacity style={styles.cardView}  onPress={() => navigation.navigate("Event Details",item)} >
+      <TouchableOpacity style={styles.cardView}  onPress={() => {
+        console.log("items >>>>> ",item);
+
+        navigation.navigate("Event Details",item)
+      }} >
           {_renderTextView("Task Name",item.task_name)}
           {_renderTextView("Description",item.description)}
           {_renderTextView("Start date",moment(item.start_date).format('YYYY-MM-DD'))}
@@ -137,7 +143,7 @@ export function Events({ navigation }) {
 
 
   return (
-    <View style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style ={{marginHorizontal:ResponsiveWidth(4),marginVertical:ResponsiveHeight(2)}}>
 
       <DropDownPicker
@@ -165,7 +171,7 @@ export function Events({ navigation }) {
         >
         <Text style={{ color: 'white', fontSize: 16 }}>Add</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 

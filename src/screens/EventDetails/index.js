@@ -3,7 +3,8 @@ import {
   FlatList,
   View,
   Text,
-  StyleSheet
+  StyleSheet,
+  SafeAreaView
 } from 'react-native';
 
 import { COLORS, COMMON_STYLE } from '../../constant';
@@ -20,7 +21,7 @@ export function EventDetails({ route,navigation }) {
 
 
 useEffect(() => {
-  if (route.params.event_type !== "Single") {
+  if (route.params.event_type.toLowerCase()  !== "single") {
     generateRecurrenceDates()
   }
 
@@ -29,13 +30,13 @@ useEffect(() => {
 
 
 const generateRecurrenceDates = () => {
-  let current = moment(route.params.start_date, 'YYYY-MM-DD');
-  const end = moment(route.params.end_date, 'YYYY-MM-DD');
-  const start = moment(route.params.start_date, 'YYYY-MM-DD');
-  const result = [];
-    
+  try {
+    let current = moment(route.params.start_date);
+  const end = moment(route.params.end_date);
+  const start = moment(route.params.start_date);
+  const result = [];    
   while (current.isSameOrBefore(end)) {
-    switch (route.params.event_type) {
+    switch (route.params.event_type.toLowerCase()) {
       case 'daily':
          current.add(1, 'days'); 
         break;
@@ -64,6 +65,13 @@ const generateRecurrenceDates = () => {
   }
   const firstFiveDates = result.slice(0, 5);
   setReccuranceData(firstFiveDates)
+    
+  } catch (error) {
+    console.log("error: " + error);
+    
+    
+  }
+  
 };
 
 const _renderItems = ({item,index}) =>(
@@ -84,9 +92,7 @@ const _renderTextView = (title,item) => (
 )
 
   return (
-    <View style={{ flex: 1 }}>
-     
-   
+    <SafeAreaView style={{ flex: 1 }}>
      <View style={styles.cardView}>
       {_renderTextView("Task Name",route?.params.task_name)}
       {_renderTextView("Description",route?.params.description)}
@@ -104,9 +110,7 @@ const _renderTextView = (title,item) => (
           />
           </View>
       )}
-
-
-    </View>
+    </SafeAreaView>
   );
 }
 

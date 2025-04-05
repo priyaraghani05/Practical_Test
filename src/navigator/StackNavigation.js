@@ -11,7 +11,7 @@ export const StackNavigation = () =>{
 
     return (
         <NavigationContainer  >
-        <Stack.Navigator initialRouteName={loginDetails.data.IsLogin === 'true' ? "Signup" : "Signup" } screenOptions={{headerTitleAlign: 'center'}} >
+        <Stack.Navigator initialRouteName={loginDetails.data.IsLogin === 'true' ? "Events" : "Signup" } screenOptions={{headerTitleAlign: 'center'}} >
         <Stack.Screen name="Signup" component={screens.Signup} />
         <Stack.Screen name="Events" component={screens.Events} />
         <Stack.Screen name="Create Event" component={screens.CreateEvent}
